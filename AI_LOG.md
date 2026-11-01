@@ -1,0 +1,3 @@
+| Tool | Prompt | Response |
+|---|---|---|
+| GitHub Copilot (Agent mode, VS Code) | Assess task-search SQL injection, cross-project disclosure, malformed-input crash, behavior, false positives, and severity. | Confirmed HIGH SQL injection (CWE-89): interpolated `q` can let a project viewer pass membership checks, then bypass project scoping with `OR project_id IS NOT NULL`; malformed quote input can cause a SQL error/500. Expected results are project-scoped matches and safe handling of search text; database row-level security or ineffective payload/dialect behavior could make the disclosure test a false positive. |
