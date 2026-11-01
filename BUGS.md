@@ -44,3 +44,11 @@
     | node -pe "JSON.parse(require('fs').readFileSync(0,'utf8')).project.memberships.map(m=>m.user.email+' -> '+m.user.passwordHash).join('\n')"
   # prints "email -> $2a$10$..." for every member, confirmed against prisma/schema.prisma's passwordHash field
 
+## 4. No delete confirmation; no success feedback on task creation
+
+- **File:** `src/components/TaskDetail.tsx:134–138` (delete button); `src/app/projects/[id]/page.tsx:35–46` (`createTask` mutation)
+- **Category:** Data Integrity
+- **Severity:** Medium
+- **UI repro:** When I open a task and click "delete task", the app deletes the task immediately with no confirmation or undo, but it should ask for confirmation before an irreversible delete. When I add a task and click "add", the app silently updates the board with no success indicator, but it should show explicit confirmation (toast, highlight, or similar) so the user knows the action succeeded, especially on a slow connection.
+- **Description:** `deleteTask.mutate()` is wired directly to the `onClick` with no `window.confirm`, modal, or undo step, so a single misclick causes permanent, unrecoverable data loss. Symmetrically, `createTask`'s `onSuccess` only clears the input and invalidates the query cache — there is no toast, highlight, or other explicit signal that the create succeeded, which is confusing on slow networks or when the new card renders off-screen.
+- **Fix direction:** Add a confirm step (native `confirm()` is a minimal fix; a dismissable modal is better) before `deleteTask.mutate()`, and add a brief success toast/visual pulse in `createTask.onSuccess`.
